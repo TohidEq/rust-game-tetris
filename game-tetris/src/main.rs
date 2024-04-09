@@ -4,11 +4,7 @@ use crossterm::{
     terminal::{self, disable_raw_mode, enable_raw_mode, size},
     ExecutableCommand, QueueableCommand,
 };
-use std::{
-    cell,
-    f32::consts::E,
-    io::{self, stdout, Stdout, Write},
-};
+use std::io::{self, stdout, Stdout, Write};
 use std::{thread, time};
 
 use crossterm::style::Stylize;
@@ -18,11 +14,16 @@ const GAME_SPEED: u16 = 60;
 // (%)   100% W == half screen
 const PLAYGROUND_WITH: u16 = 60;
 // (%)   100% H == full screen
-const PLAYGROUND_HEIGHT: u16 = 100;
+const PLAYGROUND_HEIGHT: u16 = 80;
 
 const MARGIN_LEFT: u16 = 0;
 const MARGIN_TOP: u16 = 0;
-const BORDER: u16 = 1;
+
+const BORDER_COLOR_FG: Colors = Colors::Black;
+const BORDER_COLOR_BG: Colors = Colors::Yellow;
+const BORDER_CHAR: &str = "🮪";
+// border is = 1 :D idk how to make it dynamic
+// const BORDER: u16 = 1;
 
 enum Colors {
     Black,
@@ -45,6 +46,7 @@ struct Color {
     bg_color: Colors,
 }
 struct Cell {
+    text: String,
     location: Location,
     fill: bool,
     color: Color,
@@ -60,7 +62,7 @@ struct Playground {
 }
 
 fn draw_cell(cell: &Cell, sc: &mut Stdout) {
-    let mut text: crossterm::style::StyledContent<&str> = " ".white().on_black();
+    let mut text = String::from(&cell.text).white().on_black();
 
     match cell.color.fg_color {
         Colors::Black => {
@@ -121,44 +123,83 @@ fn draw_cell(cell: &Cell, sc: &mut Stdout) {
             text = text.on_white();
         }
     }
+
     let _x = cell.location.x * 2 + MARGIN_LEFT;
     let _y = cell.location.y + MARGIN_TOP;
 
     sc.queue(MoveTo(_x, _y))
         .unwrap()
-        .queue(Print(text))
+        .queue(Print(text.clone()))
         .unwrap()
         .queue(MoveTo(_x + 1, _y))
         .unwrap()
-        .queue(Print(text))
+        .queue(Print(text.clone()))
         .unwrap();
+}
+
+fn draw_border(playground: &mut Playground, sc: &mut Stdout) {
+    let mut new_cell = Cell {
+        text: String::from(BORDER_CHAR),
+        location: Location { x: 0, y: 0 },
+        fill: false,
+        color: Color {
+            fg_color: BORDER_COLOR_FG,
+            bg_color: BORDER_COLOR_BG,
+        },
+    };
+
+    for y in 0..playground.height + 1 {
+        new_cell.location = Location { x: 0, y: y + 1 };
+        draw_cell(&new_cell, sc);
+    }
+    for y in 0..playground.height + 1 {
+        new_cell.location = Location {
+            x: playground.width + 1,
+            y: y + 1,
+        };
+        draw_cell(&new_cell, sc);
+    }
+    for x in 0..playground.width {
+        new_cell.location = Location {
+            x: x + 1,
+            y: playground.height + 1,
+        };
+        draw_cell(&new_cell, sc);
+    }
 }
 
 fn draw_playground(playground: &mut Playground, sc: &mut Stdout) {
     for cell in &playground.cells {
         if cell.fill == true {
-            draw_cell(cell, sc);
+            let new_cell = Cell {
+                text: String::from(&cell.text),
+                location: Location {
+                    x: cell.location.x + 1,
+                    y: cell.location.y + 1,
+                },
+                fill: cell.fill,
+                color: Color {
+                    fg_color: Colors::Black,
+                    bg_color: Colors::Black,
+                },
+            };
+            draw_cell(&new_cell, sc);
         }
     }
 }
 
 impl Playground {
     fn create_playground(&mut self) {
-        let _x = self.screen_width / 2 * PLAYGROUND_WITH / 100;
-        let _y = self.screen_height * PLAYGROUND_HEIGHT / 100;
+        let _x = self.screen_width / 2 * PLAYGROUND_WITH / 100 - 2;
+        let _y = self.screen_height * PLAYGROUND_HEIGHT / 100 - 2;
         self.width = _x;
         self.height = _y;
 
         for y in 0.._y {
             for x in 0.._x {
-                let fill = if x < BORDER || x >= _x - BORDER || y >= _y - BORDER
-                // || y < BORDER // for top border
-                {
-                    true
-                } else {
-                    false
-                };
+                let fill = true;
                 self.cells.push(Cell {
+                    text: String::from(" "),
                     location: Location { x, y },
                     fill: fill,
                     color: Color {
@@ -208,6 +249,7 @@ fn main() -> io::Result<()> {
     playground.create_playground();
     sc.execute(terminal::Clear(terminal::ClearType::All))?;
     draw_playground(&mut playground, &mut sc);
+    draw_border(&mut playground, &mut sc);
 
     // Main game loop
     // - Eventsfg
