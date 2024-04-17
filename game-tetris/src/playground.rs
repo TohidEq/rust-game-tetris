@@ -13,22 +13,22 @@ pub struct Location {
     pub y: u16,
 }
 pub struct Color {
-    fg_color: Colors,
-    bg_color: Colors,
+    pub(crate) fg_color: Colors,
+    pub(crate) bg_color: Colors,
 }
 pub struct Cell {
-    text: String,
-    pub location: Location,
-    fill: bool,
-    color: Color,
+    pub(crate) text: String,
+    pub(crate) location: Location,
+    pub(crate) fill: bool,
+    pub(crate) color: Color,
 }
 pub struct Playground {
-    screen_width: u16,
-    screen_height: u16,
-    width: u16,
-    height: u16,
+    pub screen_width: u16,
+    pub screen_height: u16,
+    pub width: u16,
+    pub height: u16,
 
-    cells: Vec<Cell>, // [[Cell; PLAYGROUND_WITH as usize]; PLAYGROUND_HEIGHT as usize],
+    pub cells: Vec<Cell>, // [[Cell; PLAYGROUND_WITH as usize]; PLAYGROUND_HEIGHT as usize],
 }
 
 impl Playground {
@@ -49,7 +49,7 @@ impl Playground {
 
         for y in 0.._y {
             for x in 0.._x {
-                let fill = true;
+                let fill = false;
                 self.cells.push(Cell {
                     text: String::from(" "),
                     location: Location { x, y },
@@ -70,6 +70,14 @@ impl Playground {
 
     pub fn get_cell(&mut self, index: usize) -> &Cell {
         return &self.cells[index];
+    }
+
+    pub fn update_cell(&mut self, cell: Cell) {
+        let x = cell.location.x;
+        let y = cell.location.y;
+        let index = self.get_index(x, y);
+
+        self.cells[index] = cell;
     }
 
     pub fn draw_border(&mut self, sc: &mut Stdout) {
@@ -105,21 +113,19 @@ impl Playground {
 
     pub fn draw_playground(&mut self, sc: &mut Stdout) {
         for cell in &self.cells {
-            if cell.fill == true {
-                let new_cell = Cell {
-                    text: String::from(&cell.text),
-                    location: Location {
-                        x: cell.location.x + 1,
-                        y: cell.location.y + 1,
-                    },
-                    fill: cell.fill,
-                    color: Color {
-                        fg_color: Colors::Black,
-                        bg_color: Colors::Black,
-                    },
-                };
-                Playground::draw_cell(&new_cell, sc)
-            }
+            let new_cell = Cell {
+                text: String::from(&cell.text),
+                location: Location {
+                    x: cell.location.x + 1,
+                    y: cell.location.y + 1,
+                },
+                fill: cell.fill,
+                color: Color {
+                    fg_color: cell.color.fg_color,
+                    bg_color: cell.color.bg_color,
+                },
+            };
+            Playground::draw_cell(&new_cell, sc)
         }
     }
 

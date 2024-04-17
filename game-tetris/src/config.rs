@@ -13,5 +13,6 @@ pub const MARGIN_TOP: u16 = 0;
 pub const BORDER_COLOR_FG: Colors = Colors::Black;
 pub const BORDER_COLOR_BG: Colors = Colors::Yellow;
 pub const BORDER_CHAR: &str = "🮪";
+pub const BLOCK_CHAR: &str = "█";
 // border is = 1 :D idk how to make it dynamic
 // pub const BORDER: u16 = 1;

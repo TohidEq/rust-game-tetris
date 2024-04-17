@@ -1,5 +1,5 @@
 pub struct ActiveTetrisBlock {
-    tetris_block: TetrisBlocks,
+    tetris_block: TetrisBlock,
     rotation: Rotation,
     location: Location,
     finished: bool,
