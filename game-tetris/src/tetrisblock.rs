@@ -28,7 +28,7 @@ impl TetrisBlock {
             4 => return Self::J,
             5 => return Self::S,
             6 => return Self::Z,
-            _ => return Self::Z,
+            _ => Self::random(),
         }
     }
 
@@ -172,9 +172,16 @@ impl TetrisBlock {
                             y: location.y + y as u16,
                         },
                         fill: !delete,
-                        color: Color {
-                            fg_color: Colors::Blue,
-                            bg_color: Colors::Blue,
+                        color: if !delete {
+                            Color {
+                                fg_color: self.get_color(),
+                                bg_color: self.get_color(),
+                            }
+                        } else {
+                            Color {
+                                fg_color: config::PLAYGROUND_COLOR_FG,
+                                bg_color: config::PLAYGROUND_COLOR_BG,
+                            }
                         },
                     };
                     playground.update_cell(new_cell);

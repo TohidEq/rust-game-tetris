@@ -55,8 +55,8 @@ impl Playground {
                     location: Location { x, y },
                     fill: fill,
                     color: Color {
-                        fg_color: Colors::Black,
-                        bg_color: Colors::Black,
+                        fg_color: config::PLAYGROUND_COLOR_FG,
+                        bg_color: config::PLAYGROUND_COLOR_BG,
                     },
                 })
             }

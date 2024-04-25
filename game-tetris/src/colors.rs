@@ -36,7 +36,7 @@ impl Colors {
                 return text.on_magenta();
             }
             Colors::Purple => {
-                return text.on_black();
+                return text.on_dark_magenta();
             }
             Colors::Cyan => {
                 return text.on_cyan();
@@ -68,7 +68,7 @@ impl Colors {
                 return text.magenta();
             }
             Colors::Purple => {
-                return text.black();
+                return text.dark_red();
             }
             Colors::Cyan => {
                 return text.cyan();

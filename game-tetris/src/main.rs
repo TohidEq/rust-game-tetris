@@ -55,10 +55,10 @@ fn main() -> io::Result<()> {
     sc.queue(MoveTo(0, 0))?.queue(Print(strdd))?;
 
     let mut my_tetris_block = TetrisBlock::random();
-    let my_color = Color {
-        fg_color: my_tetris_block.get_color(),
-        bg_color: my_tetris_block.get_color(),
-    };
+    // let my_color = Color {
+    //     fg_color: my_tetris_block.get_color(),
+    //     bg_color: my_tetris_block.get_color(),
+    // };
 
     my_tetris_block.update_block(
         Rotation::Deg0,
@@ -71,8 +71,19 @@ fn main() -> io::Result<()> {
     playground.draw_border(&mut sc);
     sc.flush()?;
 
+    my_tetris_block.update_block(
+        Rotation::Deg0,
+        Location { x: 2, y: 2 },
+        &mut playground,
+        true,
+    );
+
+    playground.draw_playground(&mut sc);
+    playground.draw_border(&mut sc);
+    sc.flush()?;
+
     // ====
-    let millis = time::Duration::from_millis(5000);
+    let millis = time::Duration::from_millis(800);
     thread::sleep(millis);
 
     // game is finished

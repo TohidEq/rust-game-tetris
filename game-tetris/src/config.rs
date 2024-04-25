@@ -14,5 +14,7 @@ pub const BORDER_COLOR_FG: Colors = Colors::Black;
 pub const BORDER_COLOR_BG: Colors = Colors::Yellow;
 pub const BORDER_CHAR: &str = "🮪";
 pub const BLOCK_CHAR: &str = "█";
+pub const PLAYGROUND_COLOR_BG: Colors = Colors::Black;
+pub const PLAYGROUND_COLOR_FG: Colors = Colors::Black;
 // border is = 1 :D idk how to make it dynamic
 // pub const BORDER: u16 = 1;
