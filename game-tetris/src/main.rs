@@ -93,3 +93,23 @@ fn main() -> io::Result<()> {
 
     Ok(())
 }
+
+/*
+NOTE
+hardafe ke update mishe:
+
+draw
+delete az arr
+check invalid(update shodeye block)
+invalid:
+    block ghabli insert mishe
+    next block generate mishe
+    az aval
+valid:
+    block update
+    block insert
+    az aval
+
+
+ez bere
+ */

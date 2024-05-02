@@ -147,6 +147,28 @@ impl TetrisBlock {
         }
     }
 
+    pub fn check_invalid(
+        &mut self,
+        // block_type: TetrisBlock,
+        rotation: Rotation,
+        location: Location,
+        playground: &mut Playground,
+        delete: bool, // true -> delete from screen to adding new one
+    ) -> bool {
+        let blocks = self.get_block(rotation);
+        for y in 0..blocks.len() {
+            for x in 0..blocks[y].len() {
+                if blocks[y][x] == "X" {
+                    let index = playground.get_index(location.x + x as u16, location.y + y as u16);
+                    if playground.cells[index].fill {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     pub fn update_block(
         &mut self,
         // block_type: TetrisBlock,
@@ -159,7 +181,7 @@ impl TetrisBlock {
         for y in 0..blocks.len() {
             for x in 0..blocks[y].len() {
                 if blocks[y][x] == "X" {
-                    // let index = playground.get_index(x as u16, y as u16);
+                    // let index = playground.get_index(location.x + x as u16, location.y + y as u16);
 
                     let new_cell = Cell {
                         text: if delete {
