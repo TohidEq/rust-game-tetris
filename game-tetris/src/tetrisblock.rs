@@ -156,6 +156,17 @@ impl TetrisBlock {
         delete: bool, // true -> delete from screen to adding new one
     ) -> bool {
         let blocks = self.get_block(rotation);
+
+        if
+        // barkhord be (max y) zamin
+        (location.y + blocks.len() as u16 - 1) >= playground.height
+        || // biron az (max x) haashie
+        (location.x + blocks[0].len() as u16 -1 ) > playground.width
+        {
+            return true;
+        }
+
+        // barkhorb ba block haye to playground
         for y in 0..blocks.len() {
             for x in 0..blocks[y].len() {
                 if blocks[y][x] == "X" {
