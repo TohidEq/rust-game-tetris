@@ -4,7 +4,7 @@ use crate::{
     playground::{self, Cell, Color, Location, Playground},
     rotation::Rotation,
 };
-use rand::Rng;
+use rand::{random, Rng};
 use std::io::{self, stdout, Stdout, Write};
 
 #[derive(Debug, Copy, Clone)]
