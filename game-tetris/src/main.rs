@@ -255,9 +255,13 @@ fn main() -> io::Result<()> {
                 // new block
                 if block_life == 0 {
                     // check score here :D
-                    let row_for_move = playground.check_rows(&mut sc);
-                    if row_for_move != 0 {
-                        playground.move_rows(&mut sc, row_for_move);
+                    for i in 0..4 {
+                        // (0..4) range = longest block (I)
+
+                        let row_for_move = playground.check_rows(&mut sc);
+                        if row_for_move != 0 {
+                            playground.move_rows(&mut sc, row_for_move);
+                        }
                     }
 
                     block_life = config::BLOCK_LIFE;
