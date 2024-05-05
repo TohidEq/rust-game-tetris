@@ -1,5 +1,6 @@
 use crossterm::{cursor::MoveTo, style::Print, QueueableCommand};
 use std::io::Stdout;
+use std::io::Write;
 
 use crossterm::style::Stylize;
 
@@ -148,5 +149,50 @@ impl Playground {
             .unwrap()
             .queue(Print(text.clone()))
             .unwrap();
+    }
+
+    pub fn move_rows(&mut self, sc: &mut Stdout, row: u16) {
+        //             1..5
+        for y in (1..row + 1).rev() {
+            for x in (0..self.width) {
+                let index = self.get_index(x, y - 1);
+                let cell = self.get_cell(index);
+
+                let new_cell = Cell {
+                    text: cell.text.clone(),
+                    location: Location { x: x, y: y },
+                    fill: cell.fill,
+                    color: Color {
+                        fg_color: (cell.color.fg_color),
+                        bg_color: (cell.color.bg_color),
+                    },
+                };
+
+                self.update_cell(new_cell);
+            }
+        }
+        // sc.queue(MoveTo(0, 0))
+        //     .unwrap()
+        //     .queue(Print(format!("two: {}", row)))
+        //     .unwrap();
+    }
+
+    pub fn check_rows(&mut self, sc: &mut Stdout) -> u16 {
+        for y in (1..self.height as u16).rev() {
+            let mut is_fill_all: bool = true;
+
+            for x in (0..self.width) {
+                let index = self.get_index(x, y);
+                let cell = self.get_cell(index);
+                if cell.fill == false {
+                    is_fill_all = false;
+                }
+            }
+            if is_fill_all {
+                return y;
+            }
+        }
+
+        return 0;
     }
 }

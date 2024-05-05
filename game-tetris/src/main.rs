@@ -64,7 +64,15 @@ fn main() -> io::Result<()> {
 
     let mut my_tetris_block = TetrisBlock::random();
 
-    let mut block_location: Location = Location { x: max_x / 8, y: 0 };
+    let start_location = Location {
+        x: max_x / 8 - 2,
+        y: 0,
+    };
+
+    let mut block_location: Location = Location {
+        x: start_location.x,
+        y: start_location.y,
+    };
     let mut block_location_new: Location = Location {
         x: block_location.x,
         y: block_location.y,
@@ -74,6 +82,7 @@ fn main() -> io::Result<()> {
     let mut block_rotation_new: Rotation = block_rotation;
 
     let mut block_life = config::BLOCK_LIFE;
+
     // let my_color = Color {
     //     fg_color: my_tetris_block.get_color(),
     //     bg_color: my_tetris_block.get_color(),
@@ -131,12 +140,34 @@ fn main() -> io::Result<()> {
                                 status = Status::End;
                             }
 
+                            // disabled :)
+                            /*
                             KeyCode::Char(' ') => {
-                                playground_frame = config::GAME_SPEED; // turbo
+                                playground_frame = 1; // skip here
+                                block_life = config::BLOCK_LIFE;
+                                my_tetris_block.update_block(
+                                    &mut block_rotation,
+                                    &mut block_location,
+                                    &mut playground,
+                                    true,
+                                );
 
-                                block_location_new.y += 1;
+                                for i in block_location.y..playground.height - 1 {
+                                    if my_tetris_block.check_invalid(
+                                        &mut block_rotation,
+                                        &Location {
+                                            x: block_location.x,
+                                            y: i,
+                                        },
+                                        &mut playground,
+                                        false,
+                                    ) {
+                                        block_location.y = i - 1;
+                                        block_location_new.y = i - 0;
+                                    }
+                                }
                             }
-
+                                    */
                             KeyCode::Char('w') => {
                                 block_rotation_new = block_rotation.next();
                             }
@@ -145,7 +176,11 @@ fn main() -> io::Result<()> {
                                     block_location_new.x -= 1;
                                 }
                             }
-                            KeyCode::Char('s') => {}
+                            KeyCode::Char('s') => {
+                                playground_frame = config::GAME_SPEED; // turbo here
+
+                                block_location_new.y += 1;
+                            }
                             KeyCode::Char('d') => {
                                 // az kadr nazane biroon
                                 block_location_new.x += 1;
@@ -171,6 +206,17 @@ fn main() -> io::Result<()> {
                     &mut playground,
                     true,
                 );
+
+                let mut longest_row_size: u16 = 1;
+                for i in 0..my_tetris_block.get_block(&block_rotation_new).len() {
+                    if my_tetris_block.get_block(&block_rotation_new)[i].len() as u16
+                        > longest_row_size
+                    {
+                        longest_row_size =
+                            my_tetris_block.get_block(&block_rotation_new)[i].len() as u16
+                    }
+                }
+
                 // tadakhol nadashte bashe
                 if !my_tetris_block.check_invalid(
                     &mut block_rotation_new,
@@ -179,9 +225,9 @@ fn main() -> io::Result<()> {
                     false,
                 ) &&
                 // barkhord ba divar raast
-                (playground.width+1
+                (playground.width
                     > block_location_new.x
-                        + my_tetris_block.get_block(&block_rotation_new)[0].len() as u16 )
+                        + longest_row_size -1)
                 {
                     block_location = Location {
                         x: block_location_new.x,
@@ -198,6 +244,7 @@ fn main() -> io::Result<()> {
                     };
                     block_rotation_new = block_rotation;
                 }
+
                 my_tetris_block.update_block(
                     &mut block_rotation,
                     &mut block_location,
@@ -205,11 +252,22 @@ fn main() -> io::Result<()> {
                     false,
                 );
 
+                // new block
                 if block_life == 0 {
+                    // check score here :D
+                    let row_for_move = playground.check_rows(&mut sc);
+                    if row_for_move != 0 {
+                        playground.move_rows(&mut sc, row_for_move);
+                    }
+
                     block_life = config::BLOCK_LIFE;
                     my_tetris_block = TetrisBlock::random();
 
-                    block_location = Location { x: max_x / 8, y: 0 };
+                    block_location = Location {
+                        x: start_location.x,
+                        y: start_location.y,
+                    };
+
                     block_rotation = Rotation::Deg0;
 
                     block_location_new = Location {
@@ -233,8 +291,6 @@ fn main() -> io::Result<()> {
                     } else {
                         status = Status::End;
                     }
-
-                    // check score here :D
                 }
                 // ---- end physics
 
