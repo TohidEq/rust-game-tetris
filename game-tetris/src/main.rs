@@ -1,3 +1,9 @@
+mod colors;
+mod config;
+mod playground;
+mod rotation;
+mod tetrisblock;
+
 use crossterm::event::{poll, read, Event, KeyCode};
 use crossterm::{
     cursor::{Hide, MoveTo, Show},
@@ -11,14 +17,6 @@ use std::{thread, time};
 use tetrisblock::TetrisBlock;
 
 use crossterm::style::Stylize;
-
-mod config;
-
-mod rotation;
-
-mod colors;
-mod playground;
-mod tetrisblock;
 use playground::{Color, Location, Playground};
 
 pub enum Status {
@@ -31,7 +29,9 @@ pub enum Status {
 }
 
 fn main() -> io::Result<()> {
+    let mut playground_frame = config::GAME_SPEED;
     let mut status = Status::Run;
+
     // init the screen
     let mut sc = stdout();
     let (max_x_fake, max_y_fake) = size()?;
@@ -63,17 +63,21 @@ fn main() -> io::Result<()> {
     sc.queue(MoveTo(0, 0))?.queue(Print(strdd))?;
 
     let mut my_tetris_block = TetrisBlock::random();
+
+    let mut block_location: Location = Location { x: max_x / 8, y: 0 };
+    let mut block_location_new: Location = Location {
+        x: block_location.x,
+        y: block_location.y,
+    };
+
+    let mut block_rotation: Rotation = Rotation::Deg0;
+    let mut block_rotation_new: Rotation = block_rotation;
+
+    let mut block_life = config::BLOCK_LIFE;
     // let my_color = Color {
     //     fg_color: my_tetris_block.get_color(),
     //     bg_color: my_tetris_block.get_color(),
     // };
-
-    my_tetris_block.update_block(
-        Rotation::Deg0,
-        Location { x: 2, y: 2 },
-        &mut playground,
-        false,
-    );
 
     /*
     my_tetris_block.update_block(
@@ -83,22 +87,32 @@ fn main() -> io::Result<()> {
         true,
     );
      */
+
     // Main game loop
     // - Eventsfg
     // - Physics
     // - Drawing
     // ====
     loop {
+        playground_frame -= 1;
         match status {
             Status::New => {}
             Status::Run => {
                 // ----
-
+                // -> first draw
+                // insert into playground
+                my_tetris_block.update_block(
+                    &mut block_rotation,
+                    &mut block_location,
+                    &mut playground,
+                    false,
+                );
                 playground.draw_playground(&mut sc);
                 playground.draw_border(&mut sc);
                 sc.flush()?;
-                // ----
 
+                // ----
+                // -> events
                 // read and apply keyboard
                 // `poll()` waits for an `Event` for a given time period
                 if poll(time::Duration::from_millis(10))? {
@@ -117,27 +131,25 @@ fn main() -> io::Result<()> {
                                 status = Status::End;
                             }
 
-                            KeyCode::Char(' ') => {}
-                            KeyCode::Char('w') => {
-                                // ----
-                                my_tetris_block.update_block(
-                                    Rotation::Deg0,
-                                    Location { x: 2, y: 2 },
-                                    &mut playground,
-                                    true,
-                                );
-                                my_tetris_block = TetrisBlock::random();
-                                my_tetris_block.update_block(
-                                    Rotation::Deg0,
-                                    Location { x: 2, y: 2 },
-                                    &mut playground,
-                                    false,
-                                );
-                                // ----
+                            KeyCode::Char(' ') => {
+                                playground_frame = config::GAME_SPEED; // turbo
+
+                                block_location_new.y += 1;
                             }
-                            KeyCode::Char('a') => {}
+
+                            KeyCode::Char('w') => {
+                                block_rotation_new = block_rotation.next();
+                            }
+                            KeyCode::Char('a') => {
+                                if block_location_new.x > 0 {
+                                    block_location_new.x -= 1;
+                                }
+                            }
                             KeyCode::Char('s') => {}
-                            KeyCode::Char('d') => {}
+                            KeyCode::Char('d') => {
+                                // az kadr nazane biroon
+                                block_location_new.x += 1;
+                            }
                             _ => {}
                         },
                         _ => {}
@@ -145,6 +157,94 @@ fn main() -> io::Result<()> {
                 } else {
                     // Timeout expired and no `Event` is available
                 }
+
+                // ----
+                // -> physics
+                if playground_frame == 0 {
+                    // move down block
+                    block_location_new.y += 1;
+                }
+
+                my_tetris_block.update_block(
+                    &mut block_rotation,
+                    &mut block_location,
+                    &mut playground,
+                    true,
+                );
+                // tadakhol nadashte bashe
+                if !my_tetris_block.check_invalid(
+                    &mut block_rotation_new,
+                    &mut block_location_new,
+                    &mut playground,
+                    false,
+                ) &&
+                // barkhord ba divar raast
+                (playground.width+1
+                    > block_location_new.x
+                        + my_tetris_block.get_block(&block_rotation_new)[0].len() as u16 )
+                {
+                    block_location = Location {
+                        x: block_location_new.x,
+                        y: block_location_new.y,
+                    };
+                    block_rotation = block_rotation_new;
+                } else {
+                    if block_location_new.y != block_location.y {
+                        block_life -= 1;
+                    }
+                    block_location_new = Location {
+                        x: block_location.x,
+                        y: block_location.y,
+                    };
+                    block_rotation_new = block_rotation;
+                }
+                my_tetris_block.update_block(
+                    &mut block_rotation,
+                    &mut block_location,
+                    &mut playground,
+                    false,
+                );
+
+                if block_life == 0 {
+                    block_life = config::BLOCK_LIFE;
+                    my_tetris_block = TetrisBlock::random();
+
+                    block_location = Location { x: max_x / 8, y: 0 };
+                    block_rotation = Rotation::Deg0;
+
+                    block_location_new = Location {
+                        x: block_location.x,
+                        y: block_location.y,
+                    };
+                    block_rotation_new = block_rotation;
+
+                    if !my_tetris_block.check_invalid(
+                        &mut block_rotation,
+                        &mut block_location,
+                        &mut playground,
+                        false,
+                    ) {
+                        my_tetris_block.update_block(
+                            &mut block_rotation,
+                            &mut block_location,
+                            &mut playground,
+                            false,
+                        );
+                    } else {
+                        status = Status::End;
+                    }
+
+                    // check score here :D
+                }
+                // ---- end physics
+
+                // ----
+                // -> drawing
+
+                playground.draw_playground(&mut sc);
+                playground.draw_border(&mut sc);
+                sc.flush()?;
+                // ----
             }
             Status::Pause => {}
             Status::End => {
@@ -157,6 +257,9 @@ fn main() -> io::Result<()> {
                 disable_raw_mode()?;
                 break;
             }
+        }
+        if playground_frame == 0 {
+            playground_frame = config::GAME_SPEED
         }
     }
     // ====

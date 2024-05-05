@@ -32,15 +32,15 @@ impl TetrisBlock {
         }
     }
 
-    pub fn get_block<'a>(&mut self, rotation: Rotation) -> Vec<Vec<&'a str>> {
+    pub fn get_block<'a>(&mut self, rotation: &Rotation) -> Vec<Vec<&'a str>> {
         match self {
-            TetrisBlock::I => return Self::block_i(rotation),
-            TetrisBlock::J => return Self::block_j(rotation),
-            TetrisBlock::L => return Self::block_l(rotation),
-            TetrisBlock::O => return Self::block_o(rotation),
-            TetrisBlock::S => return Self::block_s(rotation),
-            TetrisBlock::T => return Self::block_t(rotation),
-            TetrisBlock::Z => return Self::block_z(rotation),
+            TetrisBlock::I => return Self::block_i(*rotation),
+            TetrisBlock::J => return Self::block_j(*rotation),
+            TetrisBlock::L => return Self::block_l(*rotation),
+            TetrisBlock::O => return Self::block_o(*rotation),
+            TetrisBlock::S => return Self::block_s(*rotation),
+            TetrisBlock::T => return Self::block_t(*rotation),
+            TetrisBlock::Z => return Self::block_z(*rotation),
         }
     }
 
@@ -150,12 +150,12 @@ impl TetrisBlock {
     pub fn check_invalid(
         &mut self,
         // block_type: TetrisBlock,
-        rotation: Rotation,
-        location: Location,
+        rotation: &Rotation,
+        location: &Location,
         playground: &mut Playground,
         delete: bool, // true -> delete from screen to adding new one
     ) -> bool {
-        let blocks = self.get_block(rotation);
+        let blocks = self.get_block(&rotation);
 
         if
         // barkhord be (max y) zamin
@@ -183,8 +183,8 @@ impl TetrisBlock {
     pub fn update_block(
         &mut self,
         // block_type: TetrisBlock,
-        rotation: Rotation,
-        location: Location,
+        rotation: &Rotation,
+        location: &mut Location,
         playground: &mut Playground,
         delete: bool, // true -> delete from screen to adding new one
     ) {
