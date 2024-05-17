@@ -56,11 +56,10 @@ fn main() -> io::Result<()> {
     sc.execute(terminal::Clear(terminal::ClearType::All))?;
 
     // test get_index n get_cell
-    let i = playground.get_index(10, 10);
-    let x = playground.get_cell(i);
-    let strdd = format!("one: {}, {}", x.location.x, x.location.y);
-
-    sc.queue(MoveTo(0, 0))?.queue(Print(strdd))?;
+    //let i = playground.get_index(10, 10);
+    //let x = playground.get_cell(i);
+    //let strdd = format!("one: {}, {}", x.location.x, x.location.y);
+    //sc.queue(MoveTo(0, 0))?.queue(Print(strdd))?;
 
     let mut my_tetris_block = TetrisBlock::random();
 
