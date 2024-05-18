@@ -57,6 +57,6 @@ pub const GAME_SPEED: u16 = 10;
 
 or anything
 
-###License
+### License
 
 MIT. >>> [LICENSE](LICENSE)
