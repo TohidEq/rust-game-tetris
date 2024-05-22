@@ -222,4 +222,48 @@ impl TetrisBlock {
             }
         }
     }
+
+    pub fn just_draw_block(
+        &mut self,
+        rotation: &Rotation,
+        location: &mut Location,
+        playground: &mut Playground,
+        sc: &mut Stdout,
+        delete: bool, // true -> delete from screen to adding new one
+    ) {
+        let blocks = self.get_block(rotation);
+        for y in 0..blocks.len() {
+            for x in 0..blocks[y].len() {
+                if blocks[y][x] == "X" {
+                    // let index = playground.get_index(location.x + x as u16, location.y + y as u16);
+
+                    let new_cell = Cell {
+                        text: if delete {
+                            String::from(" ")
+                        } else {
+                            String::from(config::BLOCK_CHAR)
+                        },
+                        location: Location {
+                            x: location.x + x as u16,
+                            y: location.y + y as u16,
+                        },
+                        fill: !delete,
+                        color: if !delete {
+                            Color {
+                                fg_color: self.get_color(),
+                                bg_color: self.get_color(),
+                            }
+                        } else {
+                            Color {
+                                fg_color: config::PLAYGROUND_COLOR_FG,
+                                bg_color: config::PLAYGROUND_COLOR_BG,
+                            }
+                        },
+                    };
+                    // playground.update_cell(new_cell);
+                    Playground::draw_cell(&new_cell, sc);
+                }
+            }
+        }
+    }
 }

@@ -1,3 +1,4 @@
+use crossterm::ExecutableCommand;
 use crossterm::{cursor::MoveTo, style::Print, QueueableCommand};
 use std::io::Stdout;
 use std::io::Write;
@@ -128,6 +129,66 @@ impl Playground {
             };
             Playground::draw_cell(&new_cell, sc)
         }
+    }
+
+    pub fn draw_side_bar(&mut self, sc: &mut Stdout) {
+        for y in (1)..(self.screen_height) {
+            for x in (self.width + 3)..(self.screen_width) {
+                let new_cell = Cell {
+                    text: String::from(" "),
+                    location: Location { x: x, y: y },
+                    fill: false,
+                    color: Color {
+                        fg_color: config::PLAYGROUND_COLOR_FG,
+                        bg_color: config::PLAYGROUND_COLOR_BG,
+                    },
+                };
+                Playground::draw_cell(&new_cell, sc);
+            }
+        }
+
+        let x = (self.width * 2) + 8;
+        let mut y = 2; // ▼
+        let mut text = String::from("Next").white();
+
+        text = Colors::fg_color(&config::BORDER_COLOR_BG, text);
+        text = Colors::bg_color(&config::PLAYGROUND_COLOR_BG, text);
+
+        sc.queue(MoveTo(x, y))
+            .unwrap()
+            .queue(Print(text.bold()))
+            .unwrap();
+
+        text = String::from("  ▼  ").white();
+
+        text = Colors::fg_color(&config::BORDER_COLOR_BG, text);
+        text = Colors::bg_color(&config::PLAYGROUND_COLOR_BG, text);
+
+        sc.queue(MoveTo(x, y + 1))
+            .unwrap()
+            .queue(Print(text.bold()))
+            .unwrap();
+
+        y = 10;
+        text = String::from("Score").white();
+
+        text = Colors::fg_color(&config::BORDER_COLOR_BG, text);
+        text = Colors::bg_color(&config::PLAYGROUND_COLOR_BG, text);
+
+        sc.queue(MoveTo(x, y))
+            .unwrap()
+            .queue(Print(text.bold()))
+            .unwrap();
+
+        text = String::from("  ▼  ").white();
+
+        text = Colors::fg_color(&config::BORDER_COLOR_BG, text);
+        text = Colors::bg_color(&config::PLAYGROUND_COLOR_BG, text);
+
+        sc.queue(MoveTo(x, y + 1))
+            .unwrap()
+            .queue(Print(text.bold()))
+            .unwrap();
     }
 
     pub fn draw_cell(cell: &Cell, sc: &mut Stdout) {

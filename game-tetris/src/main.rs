@@ -82,6 +82,13 @@ fn main() -> io::Result<()> {
 
     let mut block_life = config::BLOCK_LIFE;
 
+    let mut my_next_tetris_block = TetrisBlock::random();
+    let mut next_block_location: Location = Location {
+        x: (playground.width + 4),
+        y: 4,
+    };
+    playground.draw_side_bar(&mut sc);
+    // sc.flush()?;
     // let my_color = Color {
     //     fg_color: my_tetris_block.get_color(),
     //     bg_color: my_tetris_block.get_color(),
@@ -250,6 +257,13 @@ fn main() -> io::Result<()> {
                     &mut playground,
                     false,
                 );
+                my_next_tetris_block.just_draw_block(
+                    &Rotation::Deg0,
+                    &mut next_block_location,
+                    &mut playground,
+                    &mut sc,
+                    false,
+                );
 
                 // new block
                 if block_life == 0 {
@@ -264,7 +278,21 @@ fn main() -> io::Result<()> {
                     }
 
                     block_life = config::BLOCK_LIFE;
-                    my_tetris_block = TetrisBlock::random();
+
+                    my_next_tetris_block.just_draw_block(
+                        &Rotation::Deg0,
+                        &mut next_block_location,
+                        &mut playground,
+                        &mut sc,
+                        true,
+                    );
+
+                    my_tetris_block = my_next_tetris_block;
+                    while my_tetris_block.get_block(&Rotation::Deg0)
+                        == my_next_tetris_block.get_block(&Rotation::Deg0)
+                    {
+                        my_next_tetris_block = TetrisBlock::random();
+                    }
 
                     block_location = Location {
                         x: start_location.x,
