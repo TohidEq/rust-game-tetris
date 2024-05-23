@@ -131,6 +131,30 @@ impl Playground {
         }
     }
 
+    pub fn draw_score(&mut self, sc: &mut Stdout, score: &mut u16, score_bg: &str) {
+        let x = (self.width * 2) + 8;
+        let mut y = 11; // ▼
+        let mut text = String::from(score_bg.clone()).white();
+
+        text = Colors::fg_color(&config::BORDER_COLOR_BG, text);
+        text = Colors::bg_color(&config::PLAYGROUND_COLOR_BG, text);
+
+        sc.queue(MoveTo(x, y + 1))
+            .unwrap()
+            .queue(Print(text.bold()))
+            .unwrap();
+
+        text = String::from(format!("{}", score)).white();
+
+        text = Colors::fg_color(&config::BORDER_COLOR_BG, text);
+        text = Colors::bg_color(&config::PLAYGROUND_COLOR_BG, text);
+
+        sc.queue(MoveTo(x, y + 1))
+            .unwrap()
+            .queue(Print(text.bold()))
+            .unwrap();
+    }
+
     pub fn draw_side_bar(&mut self, sc: &mut Stdout) {
         for y in (1)..(self.screen_height) {
             for x in (self.width + 3)..(self.screen_width) {
@@ -189,6 +213,27 @@ impl Playground {
             .unwrap()
             .queue(Print(text.bold()))
             .unwrap();
+
+        y = 16;
+        text = String::from("\\ (^_^) /").white();
+
+        text = Colors::fg_color(&config::BORDER_COLOR_BG, text);
+        text = Colors::bg_color(&config::PLAYGROUND_COLOR_BG, text);
+
+        sc.queue(MoveTo(x, y))
+            .unwrap()
+            .queue(Print(text.bold()))
+            .unwrap();
+
+        // text = String::from("  ▼  ").white();
+
+        // text = Colors::fg_color(&config::BORDER_COLOR_BG, text);
+        // text = Colors::bg_color(&config::PLAYGROUND_COLOR_BG, text);
+
+        // sc.queue(MoveTo(x, y + 1))
+        //     .unwrap()
+        //     .queue(Print(text.bold()))
+        //     .unwrap();
     }
 
     pub fn draw_cell(cell: &Cell, sc: &mut Stdout) {

@@ -31,7 +31,8 @@ pub enum Status {
 fn main() -> io::Result<()> {
     let mut playground_frame = config::GAME_SPEED;
     let mut status = Status::Run;
-
+    let mut score: u16 = 0;
+    let score_bg = ".....";
     // init the screen
     let mut sc = stdout();
     let (max_x_fake, max_y_fake) = size()?;
@@ -87,6 +88,7 @@ fn main() -> io::Result<()> {
         x: (playground.width + 4),
         y: 4,
     };
+
     playground.draw_side_bar(&mut sc);
     // sc.flush()?;
     // let my_color = Color {
@@ -124,6 +126,9 @@ fn main() -> io::Result<()> {
                 );
                 playground.draw_playground(&mut sc);
                 playground.draw_border(&mut sc);
+
+                playground.draw_score(&mut sc, &mut score, &score_bg);
+
                 sc.flush()?;
 
                 // ----
@@ -274,6 +279,11 @@ fn main() -> io::Result<()> {
                         let row_for_move = playground.check_rows(&mut sc);
                         if row_for_move != 0 {
                             playground.move_rows(&mut sc, row_for_move);
+                            if i > 0 {
+                                score += (playground.width) * (i + 1);
+                            } else {
+                                score += playground.width;
+                            }
                         }
                     }
 
